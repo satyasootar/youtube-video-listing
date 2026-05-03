@@ -3,6 +3,8 @@
 A premium, Apple-inspired video streaming platform built with **React 19**, **Vite**, and **Tailwind CSS 4**. This application offers a seamless and aesthetically pleasing browsing experience, pulling data from the FreeAPI YouTube service.
 
 
+https://github.com/user-attachments/assets/dde35f8d-aaa9-465e-a270-91a0b0324752
+
 ## ✨ Features
 
 - **🚀 Real-time Search**: Instant search functionality with debounced API calls and live suggestions.
