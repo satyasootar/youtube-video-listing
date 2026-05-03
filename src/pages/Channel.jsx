@@ -3,8 +3,10 @@ import { Loader2, Play, Users, Video as VideoIcon, CheckCircle2 } from 'lucide-r
 import { Link } from 'react-router-dom';
 import api from '../api';
 import VideoCard from '../components/VideoCard';
+import { useAppContext } from '../context/AppContext';
 
 export default function Channel() {
+  const { channelInfo: contextChannelInfo } = useAppContext();
   const [channelInfo, setChannelInfo] = useState(null);
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,19 +15,31 @@ export default function Channel() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [channelRes, playlistsRes] = await Promise.all([
-          api.get('/channel'),
-          api.get('/playlists?page=1&limit=8')
-        ]);
+        const promises = [api.get('/playlists?page=1&limit=8')];
         
-        if (channelRes.data?.data?.info) {
-          setChannelInfo(channelRes.data.data.info);
+        // Only fetch channel info if not available in context
+        let fetchChannelInfo = !contextChannelInfo;
+        if (fetchChannelInfo) {
+          promises.push(api.get('/channel'));
         }
+
+        const results = await Promise.all(promises);
+        
+        const playlistsRes = results[0];
         if (playlistsRes.data?.data?.data) {
           setPlaylists(playlistsRes.data.data.data);
         }
+
+        if (fetchChannelInfo) {
+          const channelRes = results[1];
+          if (channelRes.data?.data?.info) {
+            setChannelInfo(channelRes.data.data.info);
+          }
+        } else {
+          setChannelInfo(contextChannelInfo);
+        }
       } catch (err) {
-        console.error("Error fetching channel:", err);
+        console.error("Error fetching channel data:", err);
       } finally {
         setLoading(false);
       }
@@ -33,7 +47,8 @@ export default function Channel() {
     
     fetchData();
     window.scrollTo(0, 0);
-  }, []);
+  }, [contextChannelInfo]);
+
 
   if (loading) {
     return (
