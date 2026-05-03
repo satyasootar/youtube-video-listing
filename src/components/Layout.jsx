@@ -110,9 +110,6 @@ export default function Layout() {
             >
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <button className="p-2 text-muted-foreground hover:text-foreground rounded-full transition-colors">
-               <Bell className="w-5 h-5" />
-            </button>
             {channelInfo ? (
               <Link to="/channel">
                 <img src={channelInfo?.avatar?.url} alt="Avatar" className="w-8 h-8 rounded-full object-cover ring-2 ring-transparent hover:ring-primary/50 transition-all cursor-pointer" />
