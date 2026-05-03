@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ThumbsUp, ThumbsDown, Share, Download, MoreHorizontal, Loader2, Play, Bookmark } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Share, Download, MoreHorizontal, Loader2, Play, Bookmark, X, Copy, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import api from '../api';
 
@@ -48,9 +48,19 @@ export default function VideoDetails() {
   const [relatedVideos, setRelatedVideos] = useState([]);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
   
   const { addToHistory, likedVideos, toggleLike, watchLater, toggleWatchLater } = useAppContext();
+
+  const shareUrl = `${import.meta.env.VITE_APP_URL || window.location.origin}/video/${id}`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,7 +108,8 @@ export default function VideoDetails() {
   const { snippet, statistics } = video;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 max-w-[1600px] mx-auto">
+    <>
+      <div className="flex flex-col lg:flex-row gap-8 max-w-[1600px] mx-auto">
       {/* Main Video Area */}
       <div className="flex-1 lg:max-w-[70%]">
         {/* Video Player */}
@@ -158,7 +169,10 @@ export default function VideoDetails() {
                 </button>
               </div>
               
-              <button className="flex items-center gap-2 bg-muted/60 hover:bg-muted px-5 py-2.5 rounded-full transition-colors font-medium text-sm">
+              <button 
+                onClick={() => setIsShareModalOpen(true)}
+                className="flex items-center gap-2 bg-muted/60 hover:bg-muted px-5 py-2.5 rounded-full transition-colors font-medium text-sm"
+              >
                 <Share className="w-4 h-4" />
                 Share
               </button>
@@ -272,5 +286,45 @@ export default function VideoDetails() {
         ))}
       </div>
     </div>
+
+    {/* Share Modal */}
+    {isShareModalOpen && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        {/* Overlay */}
+        <div 
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+          onClick={() => setIsShareModalOpen(false)}
+        ></div>
+        
+        {/* Modal Content */}
+        <div className="relative bg-background border border-border/50 w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="p-6 flex items-center justify-between border-b border-border/50">
+            <h3 className="text-xl font-bold tracking-tight">Share</h3>
+            <button 
+              onClick={() => setIsShareModalOpen(false)}
+              className="p-2 hover:bg-muted rounded-full transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="p-8">
+            <p className="text-sm text-muted-foreground mb-4 font-medium text-center">Copy this link to share the video</p>
+            
+            <div className="flex items-center gap-2 bg-muted/40 p-2 pl-4 rounded-2xl border border-border/30">
+              <span className="flex-1 text-sm truncate text-foreground/80">{shareUrl}</span>
+              <button 
+                onClick={handleCopyLink}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${copied ? 'bg-green-500 text-white' : 'bg-white text-black hover:scale-[1.02]'}`}
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
+          
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
